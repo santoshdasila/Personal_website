@@ -195,7 +195,7 @@ export const About: React.FC<PageProps> = ({ lang }) => {
           {/* Simple Frame for Image */}
           <div className="bg-white dark:bg-dark-paper p-4 shadow-sm border border-slate-100 dark:border-white/10">
              <img 
-               src="/santosh_profile.jpg" 
+               src="pages/santosh_profile.jpg" 
                alt="Dr. Santosh Dasila" 
                className="w-full h-auto grayscale hover:grayscale-0 transition-all duration-700 ease-in-out" 
                onError={(e) => {
