@@ -199,7 +199,7 @@ export const About: React.FC<PageProps> = ({ lang }) => {
                alt="Dr. Santosh Dasila" 
                className="w-full h-auto grayscale hover:grayscale-0 transition-all duration-700 ease-in-out" 
                onError={(e) => {
-                 (e.target as HTMLImageElement).src = "https://drive.google.com/drive/folders/1FlIdLjbSAex3tn407ChbqV2I93N7O-lv?usp=drive_link";
+                 (e.target as HTMLImageElement).src = "https://ui-avatars.com/api/?name=Santosh+Dasila&size=512&background=0D8ABC&color=fff";
                }}
              />
           </div>
