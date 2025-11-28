@@ -204,13 +204,13 @@ export const Footer: React.FC = () => {
         </div>
         <div className="flex space-x-8">
           <a href="https://github.com/santoshdasila" target="_blank" rel="noopener noreferrer" className="text-slate-400 hover:text-accent transition-all duration-300 hover:-translate-y-1">
-            <Github className="w-8 h-8" strokeWidth={1.5} />
+            <Github className="w-6 h-6" strokeWidth={1.5} />
           </a>
           <a href="https://www.linkedin.com/in/santosh-dasila" target="_blank" rel="noopener noreferrer" className="text-slate-400 hover:text-accent transition-all duration-300 hover:-translate-y-1">
-            <Linkedin className="w-8 h-8" strokeWidth={1.5} />
+            <Linkedin className="w-6 h-6" strokeWidth={1.5} />
           </a>
           <a href="mailto:santosh039@physics.iitm.ac.in" className="text-slate-400 hover:text-accent transition-all duration-300 hover:-translate-y-1">
-            <Mail className="w-8 h-8" strokeWidth={1.5} />
+            <Mail className="w-6 h-6" strokeWidth={1.5} />
           </a>
         </div>
       </div>
