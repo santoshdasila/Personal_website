@@ -646,14 +646,22 @@ export const Resources: React.FC<PageProps> = ({ lang }) => {
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
   const t = TRANSLATIONS[lang];
   
-  const artCollection = [
-    { src: `https://picsum.photos/800/800?random=20`, caption: "Visualizing Sound Waves in Fluid Dynamics" },
-    { src: `https://picsum.photos/800/800?random=21`, caption: "Interference Patterns on a Vibrating Plate (Chladni)" },
-    { src: `https://picsum.photos/800/800?random=22`, caption: "Abstract Representation of White Noise" },
-    { src: `https://picsum.photos/800/800?random=23`, caption: "The Geometry of Acoustic Metamaterials" },
-    { src: `https://picsum.photos/800/800?random=24`, caption: "Harmonic Oscillation in Digital Medium" },
-    { src: `https://picsum.photos/800/800?random=25`, caption: "Spectrogram Art: Birdsong Analysis" }
-  ];
+  // Dynamically generate 100 art images (art1.jpg to art100.jpg)
+  const basePath = (import.meta as any).env?.BASE_URL || '/';
+  
+  const artCollection = Array.from({ length: 100 }, (_, i) => {
+    const id = i + 1;
+    // Helper to generate captions. You can manually fill specific IDs here if needed.
+    const getCaption = (imgId: number) => {
+        // Example: if (imgId === 1) return "My First Painting";
+        return `Acoustic Art Gallery - Image ${imgId}`;
+    };
+
+    return { 
+        src: `${basePath.replace(/\/$/, '')}/art${id}.jpg`, 
+        caption: getCaption(id) 
+    };
+  });
   
   const artImages = artCollection.map(a => a.src);
   const artCaptions = artCollection.map(a => a.caption);
@@ -855,7 +863,19 @@ export const Resources: React.FC<PageProps> = ({ lang }) => {
                   onClick={() => { setLightboxIndex(i); }}
                   className="aspect-square bg-slate-100 cursor-pointer overflow-hidden group relative"
                 >
-                  <img src={item.src} alt="Art" className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105" />
+                  <img 
+                    src={item.src} 
+                    alt={item.caption} 
+                    className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105"
+                    onError={(e) => {
+                         // Simple broken image fallback style
+                         (e.target as HTMLElement).style.opacity = "0.5";
+                         (e.target as HTMLElement).style.filter = "grayscale(100%)";
+                    }}
+                  />
+                  <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 bg-black/40 transition-opacity duration-300">
+                     <span className="text-white text-xs uppercase tracking-widest border border-white px-3 py-1">View</span>
+                  </div>
                 </div>
               ))}
             </div>
