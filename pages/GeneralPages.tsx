@@ -1,5 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { PROJECTS, PUBLICATIONS, BLOGS, BIO_LONG, BIO_SHORT, TRAVEL_LOGS, SCIENCE_BOOKS, NON_SCIENCE_BOOKS, MOVIES, DOCUMENTARIES, EDUCATION, CONTACT_INFO, TRANSLATIONS, WEB3FORMS_ACCESS_KEY } from '../constants';
 import { Language } from '../types';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -705,9 +706,10 @@ export const Resources: React.FC<PageProps> = ({ lang }) => {
       </AnimatePresence>
 
       {/* Cinematic Shared Element Lightbox */}
-      <AnimatePresence>
-        {selectedArtId && (
-           <div className="fixed inset-0 z-[100] bg-black/95 overflow-y-auto custom-scrollbar">
+      {createPortal(
+        <AnimatePresence>
+          {selectedArtId && (
+            <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/95">
               
               {/* Backdrop Click */}
               <motion.div 
@@ -715,7 +717,7 @@ export const Resources: React.FC<PageProps> = ({ lang }) => {
                  animate={{ opacity: 1 }}
                  exit={{ opacity: 0 }}
                  onClick={() => setSelectedArtId(null)}
-                 className="fixed inset-0 z-0"
+                 className="absolute inset-0 z-0"
               />
 
               {/* Close Button */}
@@ -724,7 +726,7 @@ export const Resources: React.FC<PageProps> = ({ lang }) => {
                  animate={{ opacity: 1 }}
                  exit={{ opacity: 0 }}
                  onClick={() => setSelectedArtId(null)}
-                 className="fixed top-6 right-6 text-white/50 hover:text-white transition-colors cursor-pointer z-50 p-2"
+                 className="absolute top-6 right-6 text-white/50 hover:text-white transition-colors cursor-pointer z-50 p-2"
               >
                  <X className="w-8 h-8" strokeWidth={1} />
               </motion.button>
@@ -734,12 +736,12 @@ export const Resources: React.FC<PageProps> = ({ lang }) => {
                   const item = artCollection.find(a => a.id === selectedArtId);
                   if (!item) return null;
                   return (
-                      <div className="min-h-screen w-full flex flex-col items-center justify-center pointer-events-none p-0 md:p-0">
+                      <div className="relative w-[80vw] h-[80vh] flex items-center justify-center pointer-events-none">
                          <motion.img 
                            layoutId={selectedArtId}
                            src={item.src} 
                            alt={item.caption} 
-                           className="w-full h-auto shadow-2xl pointer-events-auto cursor-pointer"
+                           className="w-full h-full object-contain pointer-events-auto cursor-pointer"
                            onClick={() => setSelectedArtId(null)}
                          />
                          
@@ -748,7 +750,7 @@ export const Resources: React.FC<PageProps> = ({ lang }) => {
                            initial={{ opacity: 0, y: 10 }}
                            animate={{ opacity: 1, y: 0, transition: { delay: 0.3 } }}
                            exit={{ opacity: 0 }}
-                           className="text-center pointer-events-none mt-4 pb-8 relative z-20"
+                           className="absolute -bottom-16 left-0 right-0 text-center pointer-events-none"
                          >
                             <span className="inline-block bg-black/50 backdrop-blur-md px-6 py-2 rounded-full border border-white/10 text-white font-sans font-light tracking-wide text-xs uppercase">
                               {item.caption}
@@ -757,9 +759,11 @@ export const Resources: React.FC<PageProps> = ({ lang }) => {
                       </div>
                   );
               })()}
-           </div>
-        )}
-      </AnimatePresence>
+            </div>
+          )}
+        </AnimatePresence>,
+        document.body
+      )}
     </div>
   );
 };
