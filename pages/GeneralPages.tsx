@@ -4,7 +4,7 @@ import { PROJECTS, PUBLICATIONS, BLOGS, BIO_LONG, BIO_SHORT, TRAVEL_LOGS, SCIENC
 import { Language } from '../types';
 import { motion, AnimatePresence } from 'framer-motion';
 import type { Variants } from 'framer-motion';
-import { Download, ExternalLink, ChevronDown, ChevronUp, MapPin, Calendar, Book, Palette, GraduationCap, Send, Mail, Phone, User, MessageSquare, ArrowRight, ArrowLeft, X, ChevronLeft, ChevronRight, CheckCircle, AlertCircle, Loader2, Film, Video } from 'lucide-react';
+import { Download, ExternalLink, ChevronDown, ChevronUp, MapPin, Calendar, Book, Palette, GraduationCap, Send, Mail, Phone, User, MessageSquare, ArrowRight, ArrowLeft, X, ChevronLeft, ChevronRight, CheckCircle, AlertCircle, Loader2, Film, Video, Eye } from 'lucide-react';
 
 interface PageProps {
   lang: Language;
@@ -17,7 +17,7 @@ const pageVariants: Variants = {
   exit: { opacity: 0, y: -10, transition: { duration: 0.5 } }
 };
 
-// --- Reusable Carousel Component (Editorial Style) ---
+// --- Reusable Carousel Component (Editorial Style) - Kept for Travel Page ---
 interface CarouselLightboxProps {
   images: string[];
   captions?: string[];
@@ -199,7 +199,8 @@ export const About: React.FC<PageProps> = ({ lang }) => {
                alt="Dr. Santosh Dasila" 
                className="w-full h-auto grayscale hover:grayscale-0 transition-all duration-700 ease-in-out" 
                onError={(e) => {
-                 (e.target as HTMLImageElement).src = "https://ui-avatars.com/api/?name=Santosh+Dasila&size=512&background=0D8ABC&color=fff";
+                 // Fallback to initial if image fails
+                 // (e.target as HTMLImageElement).src = "https://ui-avatars.com/api/?name=Santosh+Dasila&size=512&background=0D8ABC&color=fff";
                }}
              />
           </div>
@@ -643,10 +644,22 @@ export const Simulation: React.FC<PageProps> = ({ lang }) => {
 // --- Resources Page ---
 export const Resources: React.FC<PageProps> = ({ lang }) => {
   const [activeTab, setActiveTab] = useState<'links' | 'books' | 'art' | 'movies' | 'docs'>('links');
-  const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
+  const [selectedArtId, setSelectedArtId] = useState<number | null>(null);
   const t = TRANSLATIONS[lang];
   
-  // Dynamically generate 72 art images (art1.jpg to art100.jpg)
+  // Lock body scroll when art is open
+  useEffect(() => {
+    if (selectedArtId !== null) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [selectedArtId]);
+
+  // Dynamically generate 100 art images (art1.jpg to art100.jpg)
   const basePath = (import.meta as any).env?.BASE_URL || '/';
   
   const artCollection = Array.from({ length: 72 }, (_, i) => {
@@ -658,13 +671,11 @@ export const Resources: React.FC<PageProps> = ({ lang }) => {
     };
 
     return { 
+        id: i,
         src: `${basePath.replace(/\/$/, '')}/art${id}.jpg`, 
         caption: getCaption(id) 
     };
   });
-  
-  const artImages = artCollection.map(a => a.src);
-  const artCaptions = artCollection.map(a => a.caption);
 
   const tabs = [
     { id: 'links', label: t.headings.usefulLinks },
@@ -677,15 +688,39 @@ export const Resources: React.FC<PageProps> = ({ lang }) => {
   return (
     <motion.div variants={pageVariants} initial="initial" animate="animate" exit="exit" className="pt-32 pb-24 px-6 max-w-[1200px] mx-auto min-h-screen">
       
+      {/* Cinematic Art Lightbox (Zoom & Expand) */}
       <AnimatePresence>
-        {lightboxIndex !== null && (
-          <CarouselLightbox 
-             images={artImages}
-             captions={artCaptions}
-             selectedIndex={lightboxIndex}
-             onClose={() => setLightboxIndex(null)}
-             title="Art Gallery"
-          />
+        {selectedArtId !== null && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[100] flex items-center justify-center bg-black/95 backdrop-blur-sm overflow-hidden"
+            onClick={() => setSelectedArtId(null)}
+          >
+             <motion.img
+                layoutId={`art-${selectedArtId}`}
+                src={artCollection[selectedArtId].src}
+                className="w-auto h-auto max-w-full max-h-full object-contain p-4 md:p-8 rounded-sm shadow-2xl"
+                onClick={(e) => {
+                    e.stopPropagation();
+                    setSelectedArtId(null);
+                }} 
+                transition={{ duration: 0.5, ease: [0.25, 0.1, 0.25, 1] }}
+             />
+             
+             {/* Simple Caption Overlay */}
+             <motion.div 
+               initial={{ opacity: 0, y: 20 }}
+               animate={{ opacity: 1, y: 0, transition: { delay: 0.3 } }}
+               exit={{ opacity: 0 }}
+               className="absolute bottom-8 left-0 right-0 text-center pointer-events-none"
+             >
+                <span className="text-white/80 font-sans font-light tracking-wider text-sm bg-black/50 px-4 py-2 rounded-full backdrop-blur-md border border-white/10">
+                  {artCollection[selectedArtId].caption}
+                </span>
+             </motion.div>
+          </motion.div>
         )}
       </AnimatePresence>
 
@@ -856,27 +891,32 @@ export const Resources: React.FC<PageProps> = ({ lang }) => {
           )}
 
           {activeTab === 'art' && (
-            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-2">
-              {artCollection.map((item, i) => (
-                <div 
-                  key={i} 
-                  onClick={() => { setLightboxIndex(i); }}
-                  className="aspect-square bg-slate-100 cursor-pointer overflow-hidden group relative"
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
+              {artCollection.map((item) => (
+                <motion.div 
+                  layoutId={`art-${item.id}`}
+                  key={item.id} 
+                  onClick={() => setSelectedArtId(item.id)}
+                  className="aspect-square bg-slate-100 dark:bg-white/5 cursor-pointer group overflow-hidden relative"
                 >
-                  <img 
+                  <motion.img 
                     src={item.src} 
                     alt={item.caption} 
-                    className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105"
+                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                     onError={(e) => {
-                         // Simple broken image fallback style
                          (e.target as HTMLElement).style.opacity = "0.5";
                          (e.target as HTMLElement).style.filter = "grayscale(100%)";
                     }}
                   />
-                  <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 bg-black/40 transition-opacity duration-300">
-                     <span className="text-white text-xs uppercase tracking-widest border border-white px-3 py-1">View</span>
+                  
+                  {/* Hover Overlay with VIEW Text */}
+                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                    <div className="flex items-center gap-2 text-white font-sans text-xs font-bold tracking-[0.2em] border border-white/30 px-4 py-2 bg-black/20 backdrop-blur-sm rounded-full">
+                       <Eye className="w-3 h-3" />
+                       VIEW
+                    </div>
                   </div>
-                </div>
+                </motion.div>
               ))}
             </div>
           )}
