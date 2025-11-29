@@ -479,9 +479,9 @@ export const Resources: React.FC<PageProps> = ({ lang }) => {
   // Dynamically generate 100 art images (art1.jpg to art100.jpg)
   const basePath = (import.meta as any).env?.BASE_URL || '/';
   
-  const artCollection = Array.from({ length: 100 }, (_, i) => {
+  const artCollection = Array.from({ length: 72 }, (_, i) => {
     const id = i + 1;
-    const getCaption = (imgId: number) => `Acoustic Art Gallery - Image ${imgId}`;
+    const getCaption = (imgId: number) => `Art Gallery - Image ${imgId}`;
 
     return { 
         id: `art-${id}`,
@@ -707,7 +707,7 @@ export const Resources: React.FC<PageProps> = ({ lang }) => {
       {/* Cinematic Shared Element Lightbox */}
       <AnimatePresence>
         {selectedArtId && (
-           <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/95">
+           <div className="fixed inset-0 z-[100] bg-black/95 overflow-y-auto custom-scrollbar">
               
               {/* Backdrop Click */}
               <motion.div 
@@ -715,7 +715,7 @@ export const Resources: React.FC<PageProps> = ({ lang }) => {
                  animate={{ opacity: 1 }}
                  exit={{ opacity: 0 }}
                  onClick={() => setSelectedArtId(null)}
-                 className="absolute inset-0 z-0"
+                 className="fixed inset-0 z-0"
               />
 
               {/* Close Button */}
@@ -724,7 +724,7 @@ export const Resources: React.FC<PageProps> = ({ lang }) => {
                  animate={{ opacity: 1 }}
                  exit={{ opacity: 0 }}
                  onClick={() => setSelectedArtId(null)}
-                 className="absolute top-6 right-6 text-white/50 hover:text-white transition-colors cursor-pointer z-50 p-2"
+                 className="fixed top-6 right-6 text-white/50 hover:text-white transition-colors cursor-pointer z-50 p-2"
               >
                  <X className="w-8 h-8" strokeWidth={1} />
               </motion.button>
@@ -734,12 +734,12 @@ export const Resources: React.FC<PageProps> = ({ lang }) => {
                   const item = artCollection.find(a => a.id === selectedArtId);
                   if (!item) return null;
                   return (
-                      <div className="relative w-full h-full p-4 md:p-8 flex items-center justify-center pointer-events-none">
+                      <div className="min-h-screen w-full flex flex-col items-center justify-center pointer-events-none p-0 md:p-0">
                          <motion.img 
                            layoutId={selectedArtId}
                            src={item.src} 
                            alt={item.caption} 
-                           className="w-full h-full object-contain pointer-events-auto cursor-pointer"
+                           className="w-full h-auto shadow-2xl pointer-events-auto cursor-pointer"
                            onClick={() => setSelectedArtId(null)}
                          />
                          
@@ -748,7 +748,7 @@ export const Resources: React.FC<PageProps> = ({ lang }) => {
                            initial={{ opacity: 0, y: 10 }}
                            animate={{ opacity: 1, y: 0, transition: { delay: 0.3 } }}
                            exit={{ opacity: 0 }}
-                           className="absolute bottom-8 left-0 right-0 text-center pointer-events-none"
+                           className="text-center pointer-events-none mt-4 pb-8 relative z-20"
                          >
                             <span className="inline-block bg-black/50 backdrop-blur-md px-6 py-2 rounded-full border border-white/10 text-white font-sans font-light tracking-wide text-xs uppercase">
                               {item.caption}
