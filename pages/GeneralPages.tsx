@@ -646,10 +646,10 @@ export const Resources: React.FC<PageProps> = ({ lang }) => {
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
   const t = TRANSLATIONS[lang];
   
-  // Dynamically generate 100 art images (art1.jpg to art100.jpg)
+  // Dynamically generate 72 art images (art1.jpg to art100.jpg)
   const basePath = (import.meta as any).env?.BASE_URL || '/';
   
-  const artCollection = Array.from({ length: 100 }, (_, i) => {
+  const artCollection = Array.from({ length: 72 }, (_, i) => {
     const id = i + 1;
     // Helper to generate captions. You can manually fill specific IDs here if needed.
     const getCaption = (imgId: number) => {
@@ -856,7 +856,7 @@ export const Resources: React.FC<PageProps> = ({ lang }) => {
           )}
 
           {activeTab === 'art' && (
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-2">
               {artCollection.map((item, i) => (
                 <div 
                   key={i} 
