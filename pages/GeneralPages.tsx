@@ -4,170 +4,17 @@ import { PROJECTS, PUBLICATIONS, BLOGS, BIO_LONG, BIO_SHORT, TRAVEL_LOGS, SCIENC
 import { Language } from '../types';
 import { motion, AnimatePresence } from 'framer-motion';
 import type { Variants } from 'framer-motion';
-import { Download, ExternalLink, ChevronDown, ChevronUp, MapPin, Calendar, Book, Palette, GraduationCap, Send, Mail, Phone, User, MessageSquare, ArrowRight, ArrowLeft, X, ChevronLeft, ChevronRight, CheckCircle, AlertCircle, Loader2, Film, Video, Eye } from 'lucide-react';
+import { Download, ExternalLink, ChevronDown, ChevronUp, MapPin, Calendar, Book, Palette, GraduationCap, Send, Mail, Phone, User, MessageSquare, ArrowRight, ArrowLeft, X, ChevronLeft, ChevronRight, CheckCircle, AlertCircle, Loader2, Film, Video } from 'lucide-react';
 
 interface PageProps {
   lang: Language;
 }
 
-// --- Shared Animations (Slower, smoother) ---
+// --- Shared Animations ---
 const pageVariants: Variants = {
   initial: { opacity: 0, y: 10 },
   animate: { opacity: 1, y: 0, transition: { duration: 0.8, ease: "easeOut" } },
   exit: { opacity: 0, y: -10, transition: { duration: 0.5 } }
-};
-
-// --- Reusable Carousel Component (Editorial Style) - Kept for Travel Page ---
-interface CarouselLightboxProps {
-  images: string[];
-  captions?: string[];
-  selectedIndex: number;
-  onClose: () => void;
-  title: string;
-}
-
-const CarouselLightbox: React.FC<CarouselLightboxProps> = ({ images, captions, selectedIndex, onClose, title }) => {
-  const [index, setIndex] = useState(selectedIndex);
-  const [direction, setDirection] = useState(0);
-
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'ArrowRight') handleNext();
-      if (e.key === 'ArrowLeft') handlePrev();
-      if (e.key === 'Escape') onClose();
-    };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [index]);
-
-  const handleNext = (e?: React.MouseEvent) => {
-    e?.stopPropagation();
-    if (index < images.length - 1) {
-      setDirection(1);
-      setIndex(index + 1);
-    } else {
-      onClose(); 
-    }
-  };
-
-  const handlePrev = (e?: React.MouseEvent) => {
-    e?.stopPropagation();
-    if (index > 0) {
-      setDirection(-1);
-      setIndex(index - 1);
-    }
-  };
-
-  const variants: Variants = {
-    enter: (direction: number) => ({
-      x: direction > 0 ? '100%' : '-100%',
-      opacity: 0,
-    }),
-    center: {
-      x: 0,
-      opacity: 1,
-      transition: { duration: 0.5, ease: [0.16, 1, 0.3, 1] } // Custom easing
-    },
-    exit: (direction: number) => ({
-      x: direction < 0 ? '100%' : '-100%',
-      opacity: 0,
-      transition: { duration: 0.5, ease: [0.16, 1, 0.3, 1] }
-    })
-  };
-
-  return (
-    <motion.div 
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      className="fixed inset-0 z-[100] bg-white dark:bg-primary flex flex-col items-center justify-center overflow-hidden"
-    >
-      {/* Background Ambience */}
-      <div 
-        className="absolute inset-0 z-0 opacity-10 dark:opacity-20 transition-all duration-1000 scale-110 blur-3xl"
-        style={{ 
-          backgroundImage: `url(${images[index]})`,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-        }}
-      />
-
-      {/* Header */}
-      <div className="absolute top-0 left-0 right-0 flex justify-between items-start p-8 z-50">
-        <div>
-           <h3 className="text-2xl font-serif text-slate-900 dark:text-white">
-             {title}
-           </h3>
-           <div className="font-sans text-xs uppercase tracking-widest text-accent mt-1">
-             Image {String(index + 1).padStart(2, '0')} — {String(images.length).padStart(2, '0')}
-           </div>
-        </div>
-        
-        <button 
-           onClick={onClose}
-           className="p-2 hover:text-accent transition-colors text-slate-900 dark:text-white"
-        >
-           <X className="w-8 h-8" strokeWidth={1} />
-        </button>
-      </div>
-
-      {/* Navigation - Minimalist Arrows */}
-      <button 
-        onClick={handlePrev}
-        disabled={index === 0}
-        className={`absolute left-4 md:left-12 top-1/2 -translate-y-1/2 z-50 text-slate-800 dark:text-white hover:text-accent transition-all ${index === 0 ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}
-      >
-        <ArrowLeft className="w-8 h-8 md:w-12 md:h-12" strokeWidth={0.5} />
-      </button>
-
-      <button 
-        onClick={handleNext}
-        className="absolute right-4 md:right-12 top-1/2 -translate-y-1/2 z-50 text-slate-800 dark:text-white hover:text-accent transition-all"
-      >
-         {index === images.length - 1 ? <X className="w-8 h-8 md:w-12 md:h-12" strokeWidth={0.5} /> : <ArrowRight className="w-8 h-8 md:w-12 md:h-12" strokeWidth={0.5} />}
-      </button>
-
-      {/* Main Stage: Flex Column to stack Image + Caption closely */}
-      <div className="relative w-full h-full flex flex-col items-center justify-center z-10 p-4 md:p-12">
-        <div 
-          className="relative w-full max-w-[85vw] h-[65vh] flex items-center justify-center mb-4" 
-          onClick={(e) => e.stopPropagation()}
-        >
-           <AnimatePresence initial={false} custom={direction} mode="popLayout">
-             <motion.img 
-               key={index}
-               custom={direction}
-               variants={variants}
-               initial="enter"
-               animate="center"
-               exit="exit"
-               src={images[index]} 
-               alt="Gallery"
-               className="absolute w-full h-full object-contain drop-shadow-2xl"
-             />
-           </AnimatePresence>
-        </div>
-
-        {/* Caption - Now part of flow, sans-serif font */}
-        <AnimatePresence mode="wait">
-          {captions && captions[index] && (
-            <motion.div
-              key={`caption-${index}`}
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              className="z-[60] text-center max-w-2xl px-4"
-            >
-               <span className="inline-block font-sans font-light tracking-wide text-sm md:text-base text-slate-700 dark:text-slate-200 bg-white/50 dark:bg-black/40 backdrop-blur-md px-6 py-2 rounded-full border border-slate-200 dark:border-white/10 shadow-sm">
-                 {captions[index]}
-               </span>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </div>
-
-    </motion.div>
-  );
 };
 
 // --- About Page ---
@@ -199,8 +46,7 @@ export const About: React.FC<PageProps> = ({ lang }) => {
                alt="Dr. Santosh Dasila" 
                className="w-full h-auto grayscale hover:grayscale-0 transition-all duration-700 ease-in-out" 
                onError={(e) => {
-                 // Fallback to initial if image fails
-                 // (e.target as HTMLImageElement).src = "https://ui-avatars.com/api/?name=Santosh+Dasila&size=512&background=0D8ABC&color=fff";
+                 // Fallback if image fails
                }}
              />
           </div>
@@ -531,7 +377,6 @@ export const Contact: React.FC<PageProps> = ({ lang }) => {
 export const Travel: React.FC<PageProps> = ({ lang }) => {
   const t = TRANSLATIONS[lang];
   const [selectedTripId, setSelectedTripId] = useState<string | null>(null);
-  const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
 
   const selectedTrip = TRAVEL_LOGS.find(t => t.id === selectedTripId);
   const allImages = selectedTrip ? [selectedTrip.image, ...(selectedTrip.gallery || [])] : [];
@@ -539,17 +384,6 @@ export const Travel: React.FC<PageProps> = ({ lang }) => {
   return (
     <motion.div variants={pageVariants} initial="initial" animate="animate" exit="exit" className="pt-32 pb-24 px-6 max-w-[1400px] mx-auto min-h-screen">
       
-      <AnimatePresence>
-        {lightboxIndex !== null && selectedTrip && (
-          <CarouselLightbox 
-            images={allImages}
-            selectedIndex={lightboxIndex}
-            onClose={() => setLightboxIndex(null)}
-            title={selectedTrip.title}
-          />
-        )}
-      </AnimatePresence>
-
       {!selectedTrip ? (
         <>
           <div className="text-center mb-20">
@@ -605,14 +439,9 @@ export const Travel: React.FC<PageProps> = ({ lang }) => {
             {allImages.map((img, idx) => (
                <motion.div 
                  key={idx}
-                 initial={{ opacity: 0, y: 20 }}
-                 whileInView={{ opacity: 1, y: 0 }}
-                 viewport={{ once: true }}
-                 transition={{ delay: idx * 0.1 }}
-                 className="aspect-[4/5] cursor-pointer group relative overflow-hidden bg-slate-100"
-                 onClick={() => { setLightboxIndex(idx); }}
+                 className="aspect-[4/5] relative overflow-hidden bg-slate-100"
                >
-                 <img src={img} alt="Travel memory" className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110 grayscale hover:grayscale-0" />
+                 <img src={img} alt="Travel memory" className="w-full h-full object-cover" />
                </motion.div>
             ))}
           </div>
@@ -644,38 +473,32 @@ export const Simulation: React.FC<PageProps> = ({ lang }) => {
 // --- Resources Page ---
 export const Resources: React.FC<PageProps> = ({ lang }) => {
   const [activeTab, setActiveTab] = useState<'links' | 'books' | 'art' | 'movies' | 'docs'>('links');
-  const [selectedArtId, setSelectedArtId] = useState<number | null>(null);
+  const [selectedArtId, setSelectedArtId] = useState<string | null>(null);
   const t = TRANSLATIONS[lang];
   
-  // Lock body scroll when art is open
-  useEffect(() => {
-    if (selectedArtId !== null) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = '';
-    }
-    return () => {
-      document.body.style.overflow = '';
-    };
-  }, [selectedArtId]);
-
   // Dynamically generate 100 art images (art1.jpg to art100.jpg)
   const basePath = (import.meta as any).env?.BASE_URL || '/';
   
-  const artCollection = Array.from({ length: 72 }, (_, i) => {
+  const artCollection = Array.from({ length: 100 }, (_, i) => {
     const id = i + 1;
-    // Helper to generate captions. You can manually fill specific IDs here if needed.
-    const getCaption = (imgId: number) => {
-        // Example: if (imgId === 1) return "My First Painting";
-        return `Acoustic Art Gallery - Image ${imgId}`;
-    };
+    const getCaption = (imgId: number) => `Acoustic Art Gallery - Image ${imgId}`;
 
     return { 
-        id: i,
+        id: `art-${id}`,
         src: `${basePath.replace(/\/$/, '')}/art${id}.jpg`, 
         caption: getCaption(id) 
     };
   });
+
+  // Scroll locking effect
+  useEffect(() => {
+    if (selectedArtId) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+    return () => { document.body.style.overflow = 'unset'; };
+  }, [selectedArtId]);
 
   const tabs = [
     { id: 'links', label: t.headings.usefulLinks },
@@ -686,44 +509,7 @@ export const Resources: React.FC<PageProps> = ({ lang }) => {
   ];
 
   return (
-    <motion.div variants={pageVariants} initial="initial" animate="animate" exit="exit" className="pt-32 pb-24 px-6 max-w-[1200px] mx-auto min-h-screen">
-      
-      {/* Cinematic Art Lightbox (Zoom & Expand) */}
-      <AnimatePresence>
-        {selectedArtId !== null && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[100] flex items-center justify-center bg-black/95 backdrop-blur-sm overflow-hidden"
-            onClick={() => setSelectedArtId(null)}
-          >
-             <motion.img
-                layoutId={`art-${selectedArtId}`}
-                src={artCollection[selectedArtId].src}
-                className="w-auto h-auto max-w-full max-h-full object-contain p-4 md:p-8 rounded-sm shadow-2xl"
-                onClick={(e) => {
-                    e.stopPropagation();
-                    setSelectedArtId(null);
-                }} 
-                transition={{ duration: 0.5, ease: [0.25, 0.1, 0.25, 1] }}
-             />
-             
-             {/* Simple Caption Overlay */}
-             <motion.div 
-               initial={{ opacity: 0, y: 20 }}
-               animate={{ opacity: 1, y: 0, transition: { delay: 0.3 } }}
-               exit={{ opacity: 0 }}
-               className="absolute bottom-8 left-0 right-0 text-center pointer-events-none"
-             >
-                <span className="text-white/80 font-sans font-light tracking-wider text-sm bg-black/50 px-4 py-2 rounded-full backdrop-blur-md border border-white/10">
-                  {artCollection[selectedArtId].caption}
-                </span>
-             </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
+    <div className="pt-32 pb-24 px-6 max-w-[1200px] mx-auto min-h-screen relative">
       <div className="text-center mb-16">
         <h2 className="text-5xl font-serif mb-8">{t.headings.resources}</h2>
         <div className="flex justify-center gap-8 border-b border-slate-200 dark:border-white/10 pb-4 overflow-x-auto">
@@ -784,7 +570,6 @@ export const Resources: React.FC<PageProps> = ({ lang }) => {
                              alt={book.title} 
                              className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                              onError={(e) => {
-                               // Fallback to icon if image fails
                                (e.target as HTMLElement).style.display = 'none';
                                (e.target as HTMLElement).parentElement!.innerHTML = '<svg class="w-8 h-8 text-slate-300" stroke-width="1" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>';
                              }}
@@ -891,37 +676,90 @@ export const Resources: React.FC<PageProps> = ({ lang }) => {
           )}
 
           {activeTab === 'art' && (
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 md:gap-8">
               {artCollection.map((item) => (
-                <motion.div 
-                  layoutId={`art-${item.id}`}
-                  key={item.id} 
+                <div 
+                  key={item.id}
                   onClick={() => setSelectedArtId(item.id)}
-                  className="aspect-square bg-slate-100 dark:bg-white/5 cursor-pointer group overflow-hidden relative"
+                  className="aspect-square bg-slate-100 dark:bg-white/5 cursor-pointer overflow-hidden group relative shadow-md hover:shadow-xl transition-shadow duration-300"
                 >
                   <motion.img 
+                    layoutId={item.id}
                     src={item.src} 
                     alt={item.caption} 
-                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                    className="w-full h-full object-cover"
                     onError={(e) => {
                          (e.target as HTMLElement).style.opacity = "0.5";
                          (e.target as HTMLElement).style.filter = "grayscale(100%)";
                     }}
                   />
-                  
-                  {/* Hover Overlay with VIEW Text */}
+                  {/* Subtle overlay on hover */}
                   <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-                    <div className="flex items-center gap-2 text-white font-sans text-xs font-bold tracking-[0.2em] border border-white/30 px-4 py-2 bg-black/20 backdrop-blur-sm rounded-full">
-                       <Eye className="w-3 h-3" />
-                       VIEW
-                    </div>
+                    <span className="text-white text-xs uppercase tracking-[0.2em] font-light">View</span>
                   </div>
-                </motion.div>
+                </div>
               ))}
             </div>
           )}
         </motion.div>
       </AnimatePresence>
-    </motion.div>
+
+      {/* Cinematic Shared Element Lightbox */}
+      <AnimatePresence>
+        {selectedArtId && (
+           <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/95">
+              
+              {/* Backdrop Click */}
+              <motion.div 
+                 initial={{ opacity: 0 }}
+                 animate={{ opacity: 1 }}
+                 exit={{ opacity: 0 }}
+                 onClick={() => setSelectedArtId(null)}
+                 className="absolute inset-0 z-0"
+              />
+
+              {/* Close Button */}
+              <motion.button 
+                 initial={{ opacity: 0 }}
+                 animate={{ opacity: 1 }}
+                 exit={{ opacity: 0 }}
+                 onClick={() => setSelectedArtId(null)}
+                 className="absolute top-6 right-6 text-white/50 hover:text-white transition-colors cursor-pointer z-50 p-2"
+              >
+                 <X className="w-8 h-8" strokeWidth={1} />
+              </motion.button>
+
+              {/* Full Screen Image */}
+              {(() => {
+                  const item = artCollection.find(a => a.id === selectedArtId);
+                  if (!item) return null;
+                  return (
+                      <div className="relative w-full h-full p-4 md:p-8 flex items-center justify-center pointer-events-none">
+                         <motion.img 
+                           layoutId={selectedArtId}
+                           src={item.src} 
+                           alt={item.caption} 
+                           className="w-full h-full object-contain pointer-events-auto cursor-pointer"
+                           onClick={() => setSelectedArtId(null)}
+                         />
+                         
+                         {/* Caption Overlay */}
+                         <motion.div 
+                           initial={{ opacity: 0, y: 10 }}
+                           animate={{ opacity: 1, y: 0, transition: { delay: 0.3 } }}
+                           exit={{ opacity: 0 }}
+                           className="absolute bottom-8 left-0 right-0 text-center pointer-events-none"
+                         >
+                            <span className="inline-block bg-black/50 backdrop-blur-md px-6 py-2 rounded-full border border-white/10 text-white font-sans font-light tracking-wide text-xs uppercase">
+                              {item.caption}
+                            </span>
+                         </motion.div>
+                      </div>
+                  );
+              })()}
+           </div>
+        )}
+      </AnimatePresence>
+    </div>
   );
 };
